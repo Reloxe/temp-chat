@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale">
+        <title>Temp Chat - Homepage</title>
+       <link rel="stylesheet" href="style.css">
+
+
+    </head>
+
+<body>
+    <noscript><center><h3 style="color: white;">This application works with javascript !</h3></center></noscript>
+
+    <img style="position: absolute; z-index: -1; top: 12px;" src="tempchatlogo.png" width="130px" onselect="return false;" ondragstart="return false;">
+   <center> <a style="
+   font-family: 
+   archivo; color: white; 
+   font-size: 55px;
+   position: relative;
+   top: 50px;
+   ">Temp Chat</a></center>
+
+  <center> 
+<a style="
+font-family: arimo;
+color: white;
+position: relative;
+top: 90px;
+font-size: 25px;
+line-height: 35px;
+"><b>Temp Chat - No Log<br>No Save - Yes Privacy</b></a>
+  </center> 
+
+
+
+  
+  <center> 
+    <a onclick="creteroom();" style="
+    font-family: arimo;
+    color: white;
+    position: relative;
+    top: 200px;
+    font-size: 20px;
+    background-color: #007579;
+    border: 9px solid #007579;
+    border-radius: 10px;
+    "><b>Create Chat Room</b></a>
+      </center> 
+
+
+</body>
+
+<script>
+    function creteroom() {
+    
+    var chatroomid = Math.floor(Math.random() * (9999999999 - 111111111) ) + 111111111;
+
+        alert("hello yarrak");
+
+  var urln = new URL(document.location.origin + "/chat.html");
+
+  urln.searchParams.append("chat_id", chatroomid);
+
+document.location.replace(urln)
+
+    }
+</script>
+
+</html>

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale">
+        <title>Temp Chat - Chat</title>
+       <link rel="stylesheet" href="style.css">
+
+
+    </head>
+
+<body onload="start_()">
+    <noscript><center><h3 style="color: white;">This application works with javascript !</h3></center></noscript>
+
+    <img style="position: absolute; z-index: -1; top: 12px;" src="tempchatlogo.png" width="130px" onselect="return false;" ondragstart="return false;">
+   <center> <a style="
+   font-family: 
+   archivo; color: white; 
+   font-size: 40px;
+   position: relative;
+   top: 20px;
+   ">Temp Chat</a></center>
+
+  <center> 
+<a style="
+font-family: arimo;
+color: white;
+position: relative;
+top: 40px;
+font-size: 20px;
+line-height: 35px;
+"><b>Temp Chat - No Log<br>No Save - Yes Privacy</b></a>
+  </center> 
+<br> <br>
+  <center><a 
+  id="shakerlink"
+  style="
+  color: white;
+  position: relative;
+  top: 20px;
+  font-family: arimo;
+  font-size: 18px;
+  user-select: text;
+  background-color: rgb(54, 54, 54);
+  border: 5px solid rgb(54, 54, 54);
+  ">Share Chat Link: </a></center>
+
+  <style>
+    #chat_input_id {
+    position: fixed;
+    bottom: 50px;
+    left: 50%;
+    font-size: 18px;
+    width: 50%;
+    border: 8px solid rgb(48, 48, 48);
+    transform: translateX(-50%);
+    background-color: rgb(48, 48, 48);
+    border-radius: 10px;
+    color: white;
+    outline: none;
+    transition: all 0.3s;
+    box-shadow: 0px 0px 5px black;
+    }
+    #chat_input_id:hover {
+      box-shadow: 0px 0px 5px;
+    }
+    #chat_input_id:focus {
+      box-shadow: 0px 0px 7px;
+    }
+
+    .send_button {
+  position: fixed;
+  bottom: 55px;
+  left: 77%;
+  color: rgb(59, 59, 59);
+  transition: all 0.2s;
+    }
+    .send_button:hover {
+box-shadow: 0px 0px 15px rgb(59, 59, 59);
+    }
+    .send_button:focus {
+box-shadow: 0px 0px 15px rgb(59, 59, 59);
+    }
+
+    .message_karsi_taraf {
+      color: white;
+      position: relative;
+      font-family: arimo;
+      display: block;
+      font-size: 18px;
+      box-shadow: rgb(32, 32, 32) 0px 0px 9px 1px;
+      background-color: rgb(78, 78, 78); 
+      border: 7px solid rgb(78, 78, 78); 
+      border-radius: 13px;
+      margin-bottom: 15px;
+      padding-left: 10px;
+    }
+    .user_name_sender {
+      
+      color: white;
+      position: relative;
+      font-family: arimo;
+      box-shadow: rgb(32, 32, 32) 0px 0px 9px 1px;
+      background-color: rgb(78, 78, 78); 
+      border: 3px solid rgb(78, 78, 78); 
+      font-size: 15px;
+      border-radius: 9px;
+      z-index: 5;
+    }
+
+    .message_bizim {
+      color: white;
+      position: relative;
+      box-shadow: rgb(32, 32, 32) 0px 0px 9px 1px;
+      display: block;
+      font-family: arimo;
+      text-align: right;
+      font-size: 18px;
+      padding-right: 10px;
+      background-color: rgb(70, 70, 70); 
+      border: 7px solid rgb(70, 70, 70); 
+      border-radius: 13px;
+      margin-bottom: 15px;
+    }
+  </style>
+
+<div id="chatpopup" style="
+  position: absolute;
+  z-index: 9;
+  background-color: rgb(63, 63, 63);
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0px 0px 90px 19px;
+  width: 50%;
+  display: none;
+  top: 190px;
+  height: 400px;
+">
+<br>
+  <center><a style="color: white;
+  font-family: arimo;
+  font-size: 23px;
+    "><b>Connect Chat</b></a></center>
+
+    <center><input id="chatroomin_id" placeholder="Chat Room ID" style="
+background-color: rgb(29, 29, 29); 
+position: relative;
+width: 75%;
+color: white;
+font-size: 20px;
+top: 40px;
+user-select: text;
+border: 10px solid rgb(29, 29, 29); 
+border-radius: 10px;
+    " ></center>
+<br>
+
+<center><input id="nickname_id" placeholder="Nickname" style="
+  background-color: rgb(29, 29, 29); 
+  position: relative;
+  width: 75%;
+  color: white;
+  font-size: 20px;
+  top: 40px;
+  user-select: text;
+  border: 10px solid rgb(29, 29, 29); 
+  border-radius: 10px;
+      " ></center>
+
+     <center> <a style="
+      position: relative;
+      top: 90px;
+      font-family: arimo;
+      color: rgb(167, 167, 167);
+
+      font-size: 20px;
+      background-color: rgb(29, 29, 29); 
+      border: 10px solid rgb(29, 29, 29); 
+    border-radius: 10px;
+
+      " onclick="connect_chat()">Connect &gt;</a>
+
+</center>
+
+
+</div>
+
+<div id="messages_id" style="
+background-color: rgb(43, 43, 43); 
+position: relative;
+width: 75%;
+height: 68vh;
+overflow-x: auto;
+left: 50%;
+top: 40px;
+user-select: text;
+border: 10px solid rgb(43, 43, 43); 
+border-radius: 10px;
+transform: translateX(-50%);
+"> 
+
+</div>
+
+  <input type="text" id="chat_input_id" placeholder="Connecting...">
+
+<img src="sendbuton.png" onclick="send_msg();" onselect="return false;" ondragstart="return false;" width="30px" class="send_button">
+  
+
+</body>
+
+<script>
+function connect_chat() {
+
+  var urln = new URL(document.location.href.split("?")[0]);
+  console.log(urln)
+  urln.searchParams.append("chat_id", document.getElementById("chatroomin_id").value);
+  urln.searchParams.append("nick", document.getElementById("nickname_id").value);
+
+  document.location.replace(urln);
+
+}
+// Change Me !
+const socket = new WebSocket("ws://localhost:86");
+let parms = new URLSearchParams(document.location.search);
+function send_msg() {
+    socket.send(`{"msg": "${document.getElementById("chat_input_id").value}", "nickname": "${parms.get("nick")}"}`);
+    var msgg = document.getElementById("chat_input_id").value;
+    msgg = msgg.replace(";", "&#59;");
+    msgg = msgg.replace("<", "&lt;");
+    msgg = msgg.replace(">", "&gt;");
+    document.getElementById("messages_id").innerHTML += '<a class="message_bizim">' + msgg + '</a>'
+    document.getElementById("chat_input_id").value = "";
+  }
+
+function start_() {
+  try {
+  
+  var shaerlinkk = document.location.href.split("&nick")[0];
+  
+  document.getElementById("shakerlink").innerHTML += shaerlinkk;
+} catch (error) {
+    
+  }
+
+  if (parms.get("chat_id") == null || parms.get("chat_id") == undefined) {
+    document.getElementById("chatpopup").style.display = "block";
+    return;
+  } else if (parms.get("nick") == null || parms.get("nick") == undefined) {
+    document.getElementById("chatroomin_id").value = parms.get("chat_id");
+    document.getElementById("chatpopup").style.display = "block";
+  }
+
+
+  socket.addEventListener("open", (event) => {
+    document.getElementById("chat_input_id").placeholder = "Message...";
+    socket.send(`{"msg": "${parms.get("chat_id")}", "nickname": "${parms.get("nick")}"}`);
+  });
+
+  socket.addEventListener("message", (event) => {
+    console.log(event.data)
+   var msgnick = JSON.parse(event.data);
+    document.getElementById("messages_id").innerHTML += '<a class="user_name_sender"><b>' + msgnick["nickname"] + '</b></a> <a class="message_karsi_taraf">' + msgnick["msg"] + '</a>'
+  });
+
+  var input_focused = false;
+  document.addEventListener("keypress", (event) => {
+    if (input_focused && event.keyCode == 13) {
+      send_msg();
+    }
+   });
+
+  document.getElementById("chat_input_id").addEventListener("focus", function() {
+    input_focused = true;
+  });
+
+  document.getElementById("chat_input_id").addEventListener("focusout", function() {
+    input_focused = false;
+  });
+
+
+}
+
+
+  
+</script>
+
+</html>

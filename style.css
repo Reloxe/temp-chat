@@ -1,0 +1,17 @@
+body {
+    background-color: #212121;
+    user-select: none;
+}
+
+
+
+@font-face {
+    font-family: "archivo";
+    src: url("ArchivoBlack-Regular.ttf");
+}
+
+
+@font-face {
+    font-family: "arimo";
+    src: url("Arimo-VariableFont_wght.ttf");
+}
