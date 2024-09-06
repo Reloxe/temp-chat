@@ -260,6 +260,7 @@ function start_() {
     console.log(event.data)
    var msgnick = JSON.parse(event.data);
     document.getElementById("messages_id").innerHTML += '<a class="user_name_sender"><b>' + msgnick["nickname"] + '</b></a> <a class="message_karsi_taraf">' + msgnick["msg"] + '</a>'
+ document.getElementById("messages_id").scrollTop = document.getElementById('messages_id').scrollHeight;
   });
 
   var input_focused = false;
