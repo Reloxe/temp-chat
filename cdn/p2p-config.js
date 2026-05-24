@@ -1,11 +1,10 @@
 const P2P_CONFIG = {
   trackers: [
     'wss://tracker.openwebtorrent.com',
+    'wss://tracker.webtorrent.dev',
     'wss://tracker.btorrent.xyz',
     'wss://tracker.files.fm:7073/announce',
-    'wss://tracker.fastcast.nz',
-    'wss://tracker.webtorrent.dev',
-    'wss://peertube2.cpy.re:443/tracker/socket'
+    'wss://tracker.novage.com.ua'
   ],
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
@@ -74,7 +73,7 @@ class TorrentP2P {
     const dc = pc.createDataChannel('chat');
     const offerId = this.generateHex(20);
     pc.offerId = offerId;
-    this.setupDataChannel(dc, pc, null);
+    this.setupDataChannel(dc, pc);
     
     const offer = await pc.createOffer();
     await pc.setLocalDescription(offer);
@@ -86,6 +85,7 @@ class TorrentP2P {
       action: 'announce',
       info_hash: this.roomHash,
       peer_id: this.myPeerId,
+      true_id: this.myPeerId,
       numwant: 5,
       offers: [{ offer: finalOffer, offer_id: offerId }]
     }));
@@ -114,9 +114,11 @@ class TorrentP2P {
         if (this.seenOffers.has(msg.offer_id)) return;
         this.seenOffers.add(msg.offer_id);
 
+        const truePeerId = msg.true_id || msg.peer_id;
+
         const pc = new RTCPeerConnection({ iceServers: P2P_CONFIG.iceServers });
         pc.offerId = msg.offer_id;
-        pc.ondatachannel = (e) => this.setupDataChannel(e.channel, pc, msg.peer_id);
+        pc.ondatachannel = (e) => this.setupDataChannel(e.channel, pc);
         
         await pc.setRemoteDescription(new RTCSessionDescription(msg.offer));
         const answer = await pc.createAnswer();
@@ -129,12 +131,13 @@ class TorrentP2P {
           peer_id: this.myPeerId,
           to_peer_id: msg.peer_id,
           answer: finalAnswer,
-          offer_id: msg.offer_id
+          offer_id: msg.offer_id,
+          true_id: this.myPeerId
         }));
       } else if (msg.answer && msg.offer_id) {
         const pc = this.pendingOffers[msg.offer_id];
         if (pc) {
-          pc.remotePeerId = msg.peer_id;
+          pc.remotePeerId = msg.true_id || msg.peer_id;
           await pc.setRemoteDescription(new RTCSessionDescription(msg.answer));
           delete this.pendingOffers[msg.offer_id];
         }
@@ -142,41 +145,52 @@ class TorrentP2P {
     } catch(e) { }
   }
 
-  setupDataChannel(dc, pc, remotePeerId) {
-    let isOpenFired = false;
+  setupDataChannel(dc, pc) {
+    dc.offerId = pc.offerId;
     
     dc.onopen = () => {
-      const peerId = remotePeerId || pc.remotePeerId;
-      if (!peerId) return;
-
-      dc.peerId = peerId;
-      dc.offerId = pc.offerId;
-
-      if (this.connections[peerId]) {
-         const existingDc = this.connections[peerId];
-         if (dc.offerId < existingDc.offerId) {
-            existingDc.replaced = true;
-            existingDc.close();
-         } else {
-            dc.replaced = true;
-            dc.close();
-            return;
-         }
-      }
-
-      isOpenFired = true;
-      this.connections[peerId] = dc;
-      this.onPeerConnect(peerId, dc);
+      dc.send(JSON.stringify({ __internal: 'identify', trueId: this.myPeerId }));
     };
+
     dc.onmessage = (e) => {
+      try {
+        const msg = JSON.parse(e.data);
+        if (msg.__internal === 'identify') {
+          const trueId = msg.trueId;
+          if (!trueId) return;
+          if (trueId === this.myPeerId) {
+             dc.close();
+             return;
+          }
+
+          if (this.connections[trueId]) {
+             const existingDc = this.connections[trueId];
+             if (dc.offerId < existingDc.offerId) {
+                existingDc.peerId = null; // Prevent UI disconnect flicker
+                existingDc.close();
+             } else {
+                dc.close();
+                return;
+             }
+          }
+          
+          dc.peerId = trueId;
+          this.connections[trueId] = dc;
+          this.onPeerConnect(trueId, dc);
+          return;
+        }
+      } catch(err) {}
+
       if (dc.peerId) this.onMessage(dc.peerId, e.data);
     };
+
     dc.onclose = () => {
-      if (isOpenFired && dc.peerId && this.connections[dc.peerId] === dc) {
+      if (dc.peerId && this.connections[dc.peerId] === dc) {
         delete this.connections[dc.peerId];
         this.onPeerDisconnect(dc.peerId);
       }
     };
+    
     pc.oniceconnectionstatechange = () => {
       if (pc.iceConnectionState === 'disconnected' || pc.iceConnectionState === 'failed') {
         dc.close();

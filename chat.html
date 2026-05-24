@@ -298,6 +298,8 @@
   <div id="messages_id"></div>
 
   <div class="chat_input_container">
+    <input type="file" id="file_input_id" style="display: none;" onchange="handleFileSelect(event)">
+    <label for="file_input_id" style="cursor: pointer; font-size: 20px; color: #a7a7a7; margin-right: 5px; user-select: none;" title="Attach File">📎</label>
     <input type="text" id="chat_input_id" placeholder="Connecting...">
     <img src="cdn/sendbuton.png" onclick="send_msg();" onselect="return false;" ondragstart="return false;"
       class="send_button">
@@ -308,8 +310,10 @@
     let chatRoomId = null;
     let myNickname = null;
     let peerNicknames = {};
+    let fileBuffers = {};
 
     function connect_chat() {
+      if (torrentP2P) return; // Prevent double clicks spawning ghost clients
       const nick = document.getElementById("nickname_id").value.trim();
       if (!nick) return;
       myNickname = nick;
@@ -331,6 +335,76 @@
     function escapeHTML(str) {
       if (!str) return "";
       return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;").replace(/;/g, "&#59;");
+    }
+
+    function appendFileMessage(nickname, filename, fileUrl, isLocal) {
+      const escapedNick = escapeHTML(nickname);
+      const escapedFilename = escapeHTML(filename);
+      const container = document.getElementById("messages_id");
+      
+      const alignment = isLocal ? "msg_local" : "msg_remote";
+      const sender = isLocal ? "" : '<div class="msg_sender_name">' + escapedNick + '</div>';
+      
+      container.innerHTML += `
+        <div class="msg_wrapper ${alignment}">
+          ${sender}
+          <div class="msg_bubble" style="background-color: ${isLocal ? '#007579' : 'rgb(78, 78, 78)'}; display: flex; align-items: center; gap: 10px;">
+            📄 <a href="${fileUrl}" download="${escapedFilename}" style="color: white; font-weight: bold; text-decoration: underline; word-break: break-all;">${escapedFilename}</a>
+          </div>
+        </div>
+      `;
+      container.scrollTop = container.scrollHeight;
+    }
+
+    async function handleFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      if (file.size > 20 * 1024 * 1024) {
+        alert("File size exceeds the 20MB limit.");
+        event.target.value = "";
+        return;
+      }
+
+      appendSystemMessage("Encrypting & sending file: " + escapeHTML(file.name) + "...");
+      const fileId = Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+      const reader = new FileReader();
+
+      reader.onload = async function(e) {
+        const base64Data = e.target.result;
+        const chunkSize = 32000;
+        const totalChunks = Math.ceil(base64Data.length / chunkSize);
+
+        await broadcast({
+          type: "file-start",
+          nickname: myNickname,
+          filename: file.name,
+          fileId: fileId,
+          totalChunks: totalChunks
+        });
+
+        for (let i = 0; i < totalChunks; i++) {
+          const chunk = base64Data.substring(i * chunkSize, (i + 1) * chunkSize);
+          await broadcast({
+            type: "file-chunk",
+            fileId: fileId,
+            chunkIndex: i,
+            data: chunk
+          });
+          await new Promise(r => setTimeout(r, 10)); // Prevent buffer overflow
+        }
+
+        await broadcast({
+          type: "file-end",
+          fileId: fileId
+        });
+
+        appendFileMessage(myNickname, file.name, base64Data, true);
+        appendSystemMessage("File sent successfully.");
+      };
+
+      reader.readAsDataURL(file);
+      event.target.value = "";
     }
 
     function appendLocalMessage(msgText) {
@@ -437,10 +511,57 @@
             const senderNick = peerNicknames[peerId] || data.nickname || "Anonymous";
             appendRemoteMessage(senderNick, data.msg);
           }
+          else if (data.type === "file-start") {
+            fileBuffers[data.fileId] = {
+              chunks: new Array(data.totalChunks),
+              filename: data.filename,
+              nickname: peerNicknames[peerId] || data.nickname || "Anonymous",
+              receivedCount: 0
+            };
+          }
+          else if (data.type === "file-chunk") {
+            const buffer = fileBuffers[data.fileId];
+            if (buffer) {
+              buffer.chunks[data.chunkIndex] = data.data;
+              buffer.receivedCount++;
+            }
+          }
+          else if (data.type === "file-end") {
+            const buffer = fileBuffers[data.fileId];
+            if (buffer && buffer.receivedCount === buffer.chunks.length) {
+              const fullData = buffer.chunks.join("");
+              appendFileMessage(buffer.nickname, buffer.filename, fullData, false);
+              delete fileBuffers[data.fileId];
+            }
+          }
           else if (data.type === "greet") {
             const guestNick = data.nickname || "Guest";
-            peerNicknames[peerId] = guestNick;
-            appendSystemMessage(guestNick + " Connected.");
+            
+            let finalNick = guestNick;
+            let counter = 1;
+            
+            // Check if name is taken by me or anyone else in peerNicknames
+            const isTaken = (name) => {
+               if (name.toLowerCase() === myNickname.toLowerCase()) return true;
+               for (const id in peerNicknames) {
+                  if (id !== peerId && peerNicknames[id].toLowerCase() === name.toLowerCase()) {
+                     return true;
+                  }
+               }
+               return false;
+            };
+
+            while (isTaken(finalNick)) {
+               finalNick = guestNick + " (" + counter + ")";
+               counter++;
+            }
+
+            if (!peerNicknames[peerId]) {
+              peerNicknames[peerId] = finalNick;
+              appendSystemMessage(finalNick + " Connected.");
+            } else {
+              peerNicknames[peerId] = finalNick;
+            }
           }
         } catch (e) {
         }
