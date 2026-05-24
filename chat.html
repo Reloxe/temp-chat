@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Temp Chat - Chat</title>
+  <link rel="stylesheet" href="cdn/style.css">
+  <script src="cdn/p2p-config.js"></script>
+  <style>
+    body {
+      font-family: arimo;
+      margin: 0;
+      padding: 0;
+    }
+
+    .header_logo {
+      position: absolute;
+      z-index: -1;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 130px;
+      opacity: 0.2;
+    }
+
+    .title {
+      color: white;
+      font-family: archivo;
+      font-size: 30px;
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    .subtitle {
+      color: white;
+      text-align: center;
+      font-size: 16px;
+      line-height: 25px;
+      margin-top: 5px;
+    }
+
+    .share_container {
+      display: flex;
+      width: 90%;
+      max-width: 800px;
+      margin: 15px auto;
+      background-color: rgb(54, 54, 54);
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .share_input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: white;
+      padding: 10px 15px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .copy_btn {
+      background-color: #007579;
+      color: white;
+      border: none;
+      padding: 0 20px;
+      font-size: 14px;
+      cursor: pointer;
+      font-family: arimo;
+      font-weight: bold;
+    }
+
+    .copy_btn:hover {
+      background-color: #009398;
+    }
+
+    #overlay {
+      display: none;
+      /* Flex when active */
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(5px);
+    }
+
+    #chatpopup {
+      background-color: #2b2b2b;
+      width: 90%;
+      max-width: 380px;
+      box-shadow: 0px 10px 40px rgba(0, 0, 0, 0.8);
+      border-radius: 16px;
+      padding: 35px 25px;
+      text-align: center;
+      border: 1px solid #3f3f3f;
+    }
+
+    .popup-icon {
+      font-size: 50px;
+      margin-bottom: 10px;
+    }
+
+    .popup_input {
+      background-color: #1a1a1a;
+      color: white;
+      font-size: 16px;
+      width: 100%;
+      box-sizing: border-box;
+      border: 2px solid #3f3f3f;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      outline: none;
+      transition: border 0.3s;
+    }
+
+    .popup_input:focus {
+      border-color: #007579;
+    }
+
+    .connect_btn {
+      color: white;
+      font-size: 18px;
+      background-color: #007579;
+      padding: 15px 30px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: block;
+      font-weight: bold;
+      width: 100%;
+      box-sizing: border-box;
+      transition: background-color 0.3s;
+    }
+
+    .connect_btn:hover {
+      background-color: #009398;
+    }
+
+    #messages_id {
+      background-color: rgb(43, 43, 43);
+      width: 90%;
+      max-width: 800px;
+      height: 60vh;
+      margin: 10px auto 80px auto;
+      overflow-y: auto;
+      overflow-x: hidden;
+      border-radius: 10px;
+      padding: 20px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .chat_input_container {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 800px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background-color: rgb(48, 48, 48);
+      border-radius: 25px;
+      padding: 5px 15px 5px 25px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+      box-sizing: border-box;
+    }
+
+    #chat_input_id {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 16px;
+      outline: none;
+      padding: 12px 0;
+    }
+
+    .send_button {
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 35px;
+      height: 35px;
+    }
+
+    .send_button:hover {
+      transform: scale(1.1);
+    }
+
+    .msg_wrapper {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .msg_remote {
+      align-items: flex-start;
+    }
+
+    .msg_local {
+      align-items: flex-end;
+    }
+
+    .msg_sender_name {
+      color: #a7a7a7;
+      font-size: 12px;
+      margin-bottom: 4px;
+      margin-left: 5px;
+      margin-right: 5px;
+    }
+
+    .msg_bubble {
+      color: white;
+      font-size: 16px;
+      border-radius: 15px;
+      padding: 10px 15px;
+      max-width: 75%;
+      word-wrap: break-word;
+      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .msg_remote .msg_bubble {
+      background-color: rgb(78, 78, 78);
+      border-top-left-radius: 3px;
+    }
+
+    .msg_local .msg_bubble {
+      background-color: #007579;
+      border-top-right-radius: 3px;
+      text-align: left;
+    }
+
+    .sys_msg {
+      color: #007579;
+      text-align: center;
+      font-size: 13px;
+      margin: 5px 0;
+      font-style: italic;
+      align-self: center;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgb(43, 43, 43);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgb(78, 78, 78);
+      border-radius: 10px;
+    }
+  </style>
+</head>
+
+<body onload="start_()">
+  <noscript>
+    <center>
+      <h3 style="color: white;">This application works with javascript !</h3>
+    </center>
+  </noscript>
+  <a href="https://www.nokersoft.com" target="_blank"
+    style="position:fixed;bottom:8px;left:15px;font-size:10px;color:gray;opacity:0.3;z-index:9999;font-weight:bold;text-decoration:none;">
+    Powered By Noker Software.
+  </a>
+
+  <div class="title">Temp Chat</div>
+  <div class="subtitle"><b>Temp Chat - No Log<br>No Save - Yes Privacy</b></div>
+
+  <div class="share_container" id="share_box" style="display: none;">
+    <input type="text" id="share_link_input" class="share_input" readonly>
+    <button class="copy_btn" onclick="copyShareLink()">Copy</button>
+  </div>
+
+  <div id="overlay">
+    <div id="chatpopup">
+      <div style="color: white; font-size: 24px; margin-bottom: 10px; font-family: archivo, sans-serif;"><b>Join Chat
+          Room</b></div>
+      <div style="color: #ccc; font-size: 14px; margin-bottom: 25px;">Please enter a nickname to join this secure chat.
+      </div>
+      <input id="nickname_id" class="popup_input" placeholder="Your Nickname"
+        onkeypress="if(event.key === 'Enter') connect_chat()">
+      <a class="connect_btn" onclick="connect_chat()">Join Now</a>
+    </div>
+  </div>
+
+  <div id="messages_id"></div>
+
+  <div class="chat_input_container">
+    <input type="text" id="chat_input_id" placeholder="Connecting...">
+    <img src="cdn/sendbuton.png" onclick="send_msg();" onselect="return false;" ondragstart="return false;"
+      class="send_button">
+  </div>
+
+  <script>
+    let torrentP2P = null;
+    let chatRoomId = null;
+    let myNickname = null;
+    let peerNicknames = {};
+
+    function connect_chat() {
+      const nick = document.getElementById("nickname_id").value.trim();
+      if (!nick) return;
+      myNickname = nick;
+      document.getElementById("overlay").style.display = "none";
+      initP2P(chatRoomId, myNickname);
+    }
+
+    function copyShareLink() {
+      const copyText = document.getElementById("share_link_input");
+      copyText.select();
+      copyText.setSelectionRange(0, 99999);
+      navigator.clipboard.writeText(copyText.value);
+      const btn = document.querySelector(".copy_btn");
+      const oldText = btn.textContent;
+      btn.textContent = "Copied!";
+      setTimeout(() => btn.textContent = oldText, 2000);
+    }
+
+    function escapeHTML(str) {
+      if (!str) return "";
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;").replace(/;/g, "&#59;");
+    }
+
+    function appendLocalMessage(msgText) {
+      const escaped = escapeHTML(msgText);
+      const container = document.getElementById("messages_id");
+      container.innerHTML += '<div class="msg_wrapper msg_local"><div class="msg_bubble">' + escaped + '</div></div>';
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function appendRemoteMessage(nickname, msgText) {
+      const escapedNick = escapeHTML(nickname);
+      const escapedMsg = escapeHTML(msgText);
+      const container = document.getElementById("messages_id");
+      container.innerHTML += '<div class="msg_wrapper msg_remote"><div class="msg_sender_name">' + escapedNick + '</div><div class="msg_bubble">' + escapedMsg + '</div></div>';
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function appendSystemMessage(msgText) {
+      const escapedMsg = escapeHTML(msgText);
+      const container = document.getElementById("messages_id");
+      container.innerHTML += '<div class="sys_msg">' + escapedMsg + '</div>';
+      container.scrollTop = container.scrollHeight;
+    }
+
+    async function sendEncrypted(peerId, payload) {
+      if (!torrentP2P) return;
+      const plainText = JSON.stringify(payload);
+      const encKey = getEncryptionKey();
+      if (encKey) {
+        const encrypted = await encryptData(plainText, encKey);
+        torrentP2P.sendTo(peerId, JSON.stringify({ encrypted: true, payload: encrypted }));
+      } else {
+        torrentP2P.sendTo(peerId, JSON.stringify({ encrypted: false, payload: plainText }));
+      }
+    }
+
+    async function broadcast(payload) {
+      if (!torrentP2P) return;
+      const plainText = JSON.stringify(payload);
+      let dataToSend;
+      const encKey = getEncryptionKey();
+      if (encKey) {
+        const encrypted = await encryptData(plainText, encKey);
+        dataToSend = JSON.stringify({ encrypted: true, payload: encrypted });
+      } else {
+        dataToSend = JSON.stringify({ encrypted: false, payload: plainText });
+      }
+      torrentP2P.broadcast(dataToSend);
+    }
+
+    async function send_msg() {
+      const inputEl = document.getElementById("chat_input_id");
+      const text = inputEl.value;
+      if (!text) return;
+
+      appendLocalMessage(text);
+      inputEl.value = "";
+
+      const payload = {
+        type: "chat",
+        nickname: myNickname,
+        msg: text
+      };
+      await broadcast(payload);
+    }
+
+    async function initP2P(roomId, nickname) {
+      chatRoomId = roomId;
+      document.getElementById("chat_input_id").placeholder = "Message...";
+      appendSystemMessage("Joining room network...");
+
+      torrentP2P = new TorrentP2P(chatRoomId);
+
+      torrentP2P.onSystemMessage = (msg) => {
+        appendSystemMessage(msg);
+      };
+
+      torrentP2P.onPeerConnect = async (peerId, dc) => {
+        await sendEncrypted(peerId, {
+          type: "greet",
+          nickname: myNickname
+        });
+      };
+
+      torrentP2P.onMessage = async (peerId, raw) => {
+        try {
+          const outer = JSON.parse(raw);
+          const encKey = getEncryptionKey();
+
+          if (encKey && !outer.encrypted) return;
+
+          let plainText;
+          if (outer.encrypted) {
+            if (!encKey) return;
+            plainText = await decryptData(outer.payload, encKey);
+            if (plainText === null || plainText.startsWith("[Şifre Çözme Başarısız")) return;
+          } else {
+            plainText = outer.payload;
+          }
+
+          const data = JSON.parse(plainText);
+
+          if (data.type === "chat") {
+            const senderNick = peerNicknames[peerId] || data.nickname || "Anonymous";
+            appendRemoteMessage(senderNick, data.msg);
+          }
+          else if (data.type === "greet") {
+            const guestNick = data.nickname || "Guest";
+            peerNicknames[peerId] = guestNick;
+            appendSystemMessage(guestNick + " Connected.");
+          }
+        } catch (e) {
+        }
+      };
+
+      torrentP2P.onPeerDisconnect = (peerId) => {
+        const nick = peerNicknames[peerId] || "Member";
+        appendSystemMessage(nick + " Disconnected.");
+        delete peerNicknames[peerId];
+      };
+    }
+
+    function start_() {
+      let hashStr = document.location.hash.substring(1);
+      let hashParams = new URLSearchParams(hashStr);
+
+      chatRoomId = hashParams.get("id");
+
+      if (!chatRoomId) {
+        window.location.replace("index.html");
+        return;
+      }
+
+      if (!hashParams.get("key")) {
+        hashParams.set("key", generateHexKey());
+        window.location.replace(window.location.pathname + window.location.search + "#" + hashParams.toString());
+        return; // Will reload cleanly
+      }
+
+      document.getElementById("share_link_input").value = window.location.href;
+      document.getElementById("share_box").style.display = "flex";
+
+      document.getElementById("overlay").style.display = "flex";
+      document.getElementById("nickname_id").focus();
+
+      var input_focused = false;
+      document.addEventListener("keypress", (event) => {
+        if (input_focused && event.key === 'Enter') {
+          send_msg();
+        }
+      });
+
+      document.getElementById("chat_input_id").addEventListener("focus", function () {
+        input_focused = true;
+      });
+
+      document.getElementById("chat_input_id").addEventListener("focusout", function () {
+        input_focused = false;
+      });
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Temp Chat is a free, secure, and anonymous P2P chat application. Create a chat room instantly with End-to-End Encryption. No logs, no history, complete privacy.">
+    <meta name="keywords" content="P2P chat, secure chat, anonymous chat room, end-to-end encryption, serverless chat, privacy chat, WebRTC chat, disposable chat, free chat room, no log chat">
+    <meta name="author" content="Noker Software">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Temp Chat - Secure P2P Anonymous Chat Room">
+    <meta property="og:description" content="Create a free, secure, and anonymous P2P chat instantly. No logs, no save, complete privacy.">
+    <meta property="og:type" content="website">
+    <title>Temp Chat - Secure P2P Anonymous Chat Room</title>
+    <link rel="stylesheet" href="cdn/style.css">
+    <script src="cdn/p2p-config.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #212121;
+            overflow-x: hidden;
+        }
+        .hero-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 85vh;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            position: relative;
+        }
+        .main-header {
+            font-family: archivo, sans-serif;
+            color: white;
+            font-size: 55px;
+            margin: 20px 0 0 0;
+        }
+        .sub-header {
+            font-family: arimo, sans-serif;
+            color: white;
+            font-size: 25px;
+            line-height: 35px;
+            margin: 20px 0 50px 0;
+            font-weight: bold;
+        }
+        .create-btn {
+            font-family: arimo, sans-serif;
+            color: white;
+            font-size: 20px;
+            background-color: #007579;
+            padding: 15px 40px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: inline-block;
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        .create-btn:hover {
+            background-color: #009398;
+            transform: translateY(-2px);
+        }
+        .logo-bg {
+            position: absolute;
+            z-index: -1;
+            top: 20px;
+            opacity: 0.1;
+            width: 150px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        /* SEO Content Styling */
+        .seo-section {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px 80px 20px;
+            text-align: left;
+            color: #d1d1d1;
+            font-family: arimo, sans-serif;
+            line-height: 1.7;
+        }
+        .seo-section h2 {
+            color: #00a4a9;
+            font-size: 26px;
+            margin-top: 40px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+        .seo-section h3 {
+            color: white;
+            font-size: 20px;
+            margin-top: 30px;
+            margin-bottom: 10px;
+        }
+        .seo-section p {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        .seo-section strong {
+            color: white;
+            background-color: rgba(0, 117, 121, 0.2);
+            padding: 2px 5px;
+            border-radius: 4px;
+        }
+        
+        .footer-credit {
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: gray;
+            font-family: arimo, sans-serif;
+        }
+        .footer-credit a {
+            color: gray;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .footer-credit a:hover {
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <noscript><h3 style="color: white; text-align: center;">This application works with javascript !</h3></noscript>
+    
+    <div class="hero-section">
+        <img class="logo-bg" src="cdn/tempchatlogo.png" alt="Temp Chat Logo - Secure P2P Chat" onselect="return false;" ondragstart="return false;">
+        
+        <h1 class="main-header">Temp Chat</h1>
+        <h2 class="sub-header">Temp Chat - No Log<br>No Save - Yes Privacy</h2>
+        
+        <div onclick="creteroom();" class="create-btn" role="button" tabindex="0" aria-label="Create a secure P2P chat room">Create Chat Room</div>
+    </div>
+
+    <!-- SEO Optimized Content Area -->
+    <main class="seo-section">
+        <h2>What is Temp Chat?</h2>
+        <p>Temp Chat is a highly secure, <strong>anonymous P2P chat room</strong> designed for absolute privacy. Unlike traditional messaging applications, Temp Chat operates entirely via <strong>WebRTC</strong> architecture, creating a direct serverless connection between you and your chat partner.</p>
+        
+        <h2>Unbreakable End-to-End Encryption</h2>
+        <p>Your digital security is our utmost priority. Every single message sent through Temp Chat is protected by military-grade <strong>AES-GCM 256-bit End-to-End Encryption</strong>. The decryption keys are generated locally on your browser and are never transmitted to any central server. This means no one, not even us, can read your conversations.</p>
+
+        <h2>Strict No Logs Policy</h2>
+        <p>True to our name, this is a strict <strong>no log chat</strong> platform. We do not store your IP addresses, we do not save your message history, and there are absolutely no databases involved in the chat process. The moment you close your browser tab, your chat room and all its contents are permanently and irreversibly destroyed.</p>
+
+        <h2>How to Use Our Serverless Chat?</h2>
+        <p>Getting started is instant and completely free. Simply click the "Create Chat Room" button at the top of this page. A unique, encrypted link will be generated for you. Share this link with anyone you want to communicate with. There are <strong>no registrations</strong>, no accounts to create, and no application downloads required. Just pure, private communication.</p>
+    </main>
+
+    <div class="footer-credit">
+        Powered By <a href="https://www.nokersoft.com" target="_blank">Noker Software</a>
+    </div>
+    
+    <script>
+        function generateHex(len) {
+            const arr = new Uint8Array(len / 2);
+            window.crypto.getRandomValues(arr);
+            return Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        function creteroom() {
+          const chatroomid = generateHex(40);
+          const key = generateHexKey();
+          
+          const hashParams = new URLSearchParams();
+          hashParams.set("id", chatroomid);
+          hashParams.set("key", key);
+          
+          window.location.href = "chat.html#" + hashParams.toString();
+        }
+    </script>
+</body>
+</html>
